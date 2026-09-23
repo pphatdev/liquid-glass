@@ -1,0 +1,21 @@
+{
+  "name": "Liquid Glass",
+  "short_name": "LiquidGlass",
+  "description": "Physical 3D optical liquid glass lenses with Snell's Law ray refraction, chromatic dispersion, and fluid silk shaders.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#080c16",
+  "theme_color": "#080c16",
+  "icons": [
+    {
+      "src": "./assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "./assets/cover.png",
+      "sizes": "1920x1080",
+      "type": "image/png"
+    }
+  ]
+}

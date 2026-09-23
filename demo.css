@@ -790,3 +790,16 @@ body {
         padding-bottom: max(32px, env(safe-area-inset-bottom, 32px));
     }
 }
+
+/* Accessibility & SEO utility for search engine crawlers */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}

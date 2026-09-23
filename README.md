@@ -5,6 +5,13 @@
   <img src="./assets/cover.png" alt="Liquid Glass Cover Banner" width="100%" />
 </p>
 
+<p align="center">
+  <a href="https://pphatdev.github.io/liquid-glass/"><img src="https://img.shields.io/badge/Live_Demo-pphatdev.github.io%2Fliquid--glass-00f0ff?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Live Demo" /></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="License MIT" /></a>
+  <img src="https://img.shields.io/badge/Dependencies-0-brightgreen.svg?style=for-the-badge" alt="Zero Dependencies" />
+  <img src="https://img.shields.io/badge/Performance-60_FPS_GPU-blueviolet.svg?style=for-the-badge" alt="60 FPS GPU" />
+</p>
+
 Ultra-realistic, physical **3D optical liquid glass lenses** with Snell's Law ray refraction, chromatic dispersion (spectral RGB wavelength split), dynamic specular highlights, and animated silk wave shaders.
 
 Available as a **zero-dependency WebGL library**, a drop-in **HTML Web Component**, an **SVG optical refraction filter**, and **pure CSS glassmorphism**.
@@ -261,7 +268,6 @@ For high-performance pure CSS glass cards:
 ├── demo.js                # Interactive reference controller & code exporter
 ├── demo.css               # Modern iOS-inspired styling & glassmorphism theme
 ├── index.html             # Interactive showcase application
-├── CNAME                  # Custom domain (liquid-glass.pphat.me)
 ├── .nojekyll              # GitHub Pages Jekyll bypass
 ├── .github/
 │   └── workflows/
@@ -291,7 +297,7 @@ Open `http://localhost:8000` in your browser.
 
 ## 🚢 GitHub Pages Deployment
 
-The repository is pre-configured with automated GitHub Actions deployment to [`liquid-glass.pphat.me`](https://liquid-glass.pphat.me).
+The repository is pre-configured with automated GitHub Actions deployment to [`pphatdev.github.io/liquid-glass`](https://pphatdev.github.io/liquid-glass/).
 
 To deploy:
 1. Commit and push your changes to `master` (or `main`).

@@ -3,13 +3,74 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Liquid Glass - Interactive Demo</title>
-    <meta name="description" content="Physical optical refraction, diffusion, and liquid glass shaders for web interfaces.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+
+    <!-- Primary Meta Tags -->
+    <title>Liquid Glass — 3D Optical Refraction & Glassmorphism Shaders</title>
+    <meta name="title" content="Liquid Glass — 3D Optical Refraction & Glassmorphism Shaders">
+    <meta name="description" content="Ultra-realistic 3D optical liquid glass lenses with Snell's Law ray refraction, chromatic dispersion, dynamic specular highlights, and animated silk cloth shaders.">
+    <meta name="keywords" content="liquid glass, glassmorphism, webgl glass, optical refraction, snells law, chromatic dispersion, 3d glass lens, glsl shader, css glass, webgl, canvas">
+    <meta name="author" content="Sophat Pho (pphatdev)">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#080c16">
+    <link rel="canonical" href="https://pphatdev.github.io/liquid-glass/">
+
+    <!-- Favicon & PWA Icons -->
+    <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
+    <link rel="apple-touch-icon" href="./assets/cover.png">
+    <link rel="manifest" href="./site.webmanifest">
+
+    <!-- Open Graph / Facebook / LinkedIn / Discord -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pphatdev.github.io/liquid-glass/">
+    <meta property="og:title" content="Liquid Glass — 3D Optical Refraction & Glassmorphism Shaders">
+    <meta property="og:description" content="Ultra-realistic 3D optical liquid glass lenses with Snell's Law ray refraction, chromatic dispersion, dynamic specular highlights, and animated silk cloth shaders.">
+    <meta property="og:image" content="https://pphatdev.github.io/liquid-glass/assets/cover.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Liquid Glass 3D Optical Refraction Lens Preview">
+    <meta property="og:site_name" content="Liquid Glass">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter Card Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://pphatdev.github.io/liquid-glass/">
+    <meta name="twitter:title" content="Liquid Glass — 3D Optical Refraction & Glassmorphism Shaders">
+    <meta name="twitter:description" content="Ultra-realistic 3D optical liquid glass lenses with Snell's Law ray refraction, chromatic dispersion, dynamic specular highlights, and animated silk cloth shaders.">
+    <meta name="twitter:image" content="https://pphatdev.github.io/liquid-glass/assets/cover.png">
+    <meta name="twitter:creator" content="@pphatdev">
+
+    <!-- JSON-LD Structured Data for Search Engines -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Liquid Glass",
+        "url": "https://pphatdev.github.io/liquid-glass/",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Any",
+        "description": "Ultra-realistic 3D optical liquid glass lenses with physical Snell's Law ray refraction, chromatic dispersion, dynamic specular highlights, and animated silk wave shaders.",
+        "browserRequirements": "Requires WebGL support",
+        "screenshot": "https://pphatdev.github.io/liquid-glass/assets/cover.png",
+        "author": {
+            "@type": "Person",
+            "name": "Sophat Pho",
+            "url": "https://github.com/pphatdev"
+        },
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        }
+    }
+    </script>
+
     <link rel="stylesheet" href="./demo.css">
 </head>
 
 <body>
+    <!-- Hidden accessible heading for search engine hierarchy -->
+    <h1 class="sr-only">Liquid Glass — 3D Optical Refraction & Glassmorphism WebGL Shader</h1>
     <div class="demo-wrapper">
         <!-- Floating Card Viewport Size Switcher (Mobile / Tablet / Full) -->
         <div class="card-size-bar" id="size-bar">

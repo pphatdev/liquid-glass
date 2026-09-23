@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pphatdev.github.io/liquid-glass/sitemap.xml

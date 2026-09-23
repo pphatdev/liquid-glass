@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://pphatdev.github.io/liquid-glass/</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://pphatdev.github.io/liquid-glass/assets/cover.png</image:loc>
+      <image:title>Liquid Glass 3D Optical Refraction Lens</image:title>
+      <image:caption>Physical 3D optical liquid glass lenses with Snell's Law ray refraction and chromatic dispersion.</image:caption>
+    </image:image>
+  </url>
+</urlset>
