@@ -498,14 +498,30 @@ export function initLiquidGlassApp() {
     const codeModal = document.getElementById('code-modal');
     const btnCloseModal = document.getElementById('btn-close-modal');
     const tabCss = document.getElementById('tab-css');
-    const tabJs = document.getElementById('tab-js');
-    const tabReact = document.getElementById('tab-react');
+    const tabSvg = document.getElementById('tab-svg');
+    const tabWebgl = document.getElementById('tab-webgl');
+    const copyLabel = document.getElementById('btn-copy-label');
     const codeBox = document.getElementById('code-box');
     const btnCopy = document.getElementById('btn-copy');
     const btnQuickCopy = document.getElementById('btn-quick-copy');
 
     let activeLang = 'css';
     let engine = null;
+
+    function setTab(lang) {
+        activeLang = lang;
+        if (tabCss) tabCss.classList.toggle('active', lang === 'css');
+        if (tabSvg) tabSvg.classList.toggle('active', lang === 'svg');
+        if (tabWebgl) tabWebgl.classList.toggle('active', lang === 'webgl');
+        if (copyLabel) {
+            copyLabel.textContent = lang === 'css' ? 'Copy CSS' : (lang === 'svg' ? 'Copy HTML+SVG' : 'Copy WebGL');
+        }
+        updateLiveCode();
+    }
+
+    if (tabCss) tabCss.addEventListener('click', () => setTab('css'));
+    if (tabSvg) tabSvg.addEventListener('click', () => setTab('svg'));
+    if (tabWebgl) tabWebgl.addEventListener('click', () => setTab('webgl'));
 
     // Helper: update live code box in real-time when sliders move
     function updateLiveCode() {
@@ -777,39 +793,154 @@ export function initLiquidGlassApp() {
     });
 
     /***
-    * Realtime Reactive CSS Glass Style Generator (CSS Style Only)
-    */
+     * Helper: get current background gradient
+     */
+    function getActiveBackgroundGradient() {
+        const found = PALETTES.find(p => p.id === state.currentPaletteId);
+        if (found) return found.preview;
+        const toHex = ([r, g, b]) => '#' + [r, g, b].map(x => Math.round(x * 255).toString(16).padStart(2, '0')).join('');
+        return `linear-gradient(135deg, ${toHex(state.currentColorDeep)}, ${toHex(state.currentColorMid)}, ${toHex(state.currentColorGlow)})`;
+    }
+
+    /***
+     * Realtime Reactive Style Generator (CSS Glass, SVG Liquid, WebGL)
+     */
     function generateCode() {
         const rad = (state.angle * Math.PI) / 180;
-        const lightX = Math.round(50 + 38 * Math.cos(rad));
-        const lightY = Math.round(50 - 38 * Math.sin(rad));
+        // Accurate glass specular spot offset within the 3D dome (radius ~ 26%)
+        const lightX = Math.round(50 + 26 * Math.cos(rad));
+        const lightY = Math.round(50 - 26 * Math.sin(rad));
         const blurPx = Math.round(state.diffusion * 35 + 6);
         const radiusValue = state.borderRadius === 100 ? '50%' : `${Math.round(state.borderRadius * 0.48)}px`;
+        const bgGradient = getActiveBackgroundGradient();
 
-        return `/* Realtime Liquid Glass Style (${state.paletteName}) */
+        if (activeLang === 'webgl') {
+            return `<!-- 1:1 Exact Liquid Glass WebGL Component -->
+<canvas id="liquid-glass" style="width: 100vw; height: 100vh; display: block;"></canvas>
+
+<script type="module">
+  import { LiquidGlass } from './liquid-glass.js';
+
+  const canvas = document.getElementById('liquid-glass');
+  const glass = new LiquidGlass(canvas, {
+    palette: '${state.currentPaletteId}',
+    brightness: ${state.brightness.toFixed(2)},
+    diffusion: ${state.diffusion.toFixed(2)},
+    refraction: ${state.refraction.toFixed(2)},
+    angle: ${Math.round(state.angle)},
+    borderRadius: ${Math.round(state.borderRadius)},
+    interactive: true
+  });
+  glass.start();
+</script>`;
+        }
+
+        if (activeLang === 'svg') {
+            return `<!-- HTML + SVG Optical Liquid Refraction Lens -->
+<div class="glass-container">
+  <div class="liquid-glass-lens"></div>
+</div>
+
+<svg style="position: absolute; width: 0; height: 0;">
+  <filter id="liquid-refract">
+    <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="2" result="noise" />
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="${Math.round(state.refraction * 250)}" xChannelSelector="R" yChannelSelector="G" />
+  </filter>
+</svg>
+
+<style>
+.glass-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: ${bgGradient};
+}
+
 .liquid-glass-lens {
     width: 280px;
     height: 280px;
     border-radius: ${radiusValue};
 
-    /* Optical Frosted Glass Blur & Dynamic Brightness */
+    /* Optical SVG Liquid Bending + Blur */
+    backdrop-filter: url(#liquid-refract) blur(${blurPx}px) brightness(${state.brightness.toFixed(2)});
+    -webkit-backdrop-filter: url(#liquid-refract) blur(${blurPx}px) brightness(${state.brightness.toFixed(2)});
+
+    /* Specular Shining Glare Spot at ${Math.round(state.angle)}° */
+    background:
+        radial-gradient(
+            circle 44px at ${lightX}% ${lightY}%,
+            rgba(255, 255, 255, 0.98) 0%,
+            rgba(255, 255, 255, 0.65) 28%,
+            rgba(255, 255, 255, 0.15) 60%,
+            transparent 100%
+        ),
+        radial-gradient(
+            circle at ${lightX}% ${lightY}%,
+            rgba(255, 255, 255, 0.35) 0%,
+            rgba(255, 255, 255, 0.10) 45%,
+            transparent 80%
+        ),
+        rgba(255, 255, 255, 0.08);
+
+    /* Crystalline Rim & Bevel */
+    border: 1px solid rgba(255, 255, 255, 0.50);
+    box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.35),
+        inset 0 2px 4px rgba(255, 255, 255, 0.85),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.25);
+}
+</style>`;
+        }
+
+        // CSS Only mode
+        return `/* Realtime Liquid Glass Style (${state.paletteName}) */
+
+/* 1. Background Container */
+.glass-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: ${bgGradient};
+}
+
+/* 2. Liquid Glass Lens Element */
+.liquid-glass-lens {
+    width: 280px;
+    height: 280px;
+    border-radius: ${radiusValue};
+
+    /* Optical Frosted Blur & Dynamic Brightness */
     backdrop-filter: blur(${blurPx}px) brightness(${state.brightness.toFixed(2)});
     -webkit-backdrop-filter: blur(${blurPx}px) brightness(${state.brightness.toFixed(2)});
 
-    /* Specular Glare Arc (Incident Light Angle: ${Math.round(state.angle)}°) */
-    background: radial-gradient(
-        circle at ${lightX}% ${lightY}%,
-        rgba(255, 255, 255, 0.42) 0%,
-        rgba(255, 255, 255, 0.08) 50%,
-        rgba(255, 255, 255, 0.01) 100%
-    ), rgba(255, 255, 255, 0.06);
+    /* Specular Shining Glare Spot (Intense glossy highlight at ${Math.round(state.angle)}°) */
+    background:
+        /* Crisp high-gloss shining spot at light coordinates */
+        radial-gradient(
+            circle 44px at ${lightX}% ${lightY}%,
+            rgba(255, 255, 255, 0.98) 0%,
+            rgba(255, 255, 255, 0.65) 28%,
+            rgba(255, 255, 255, 0.15) 60%,
+            transparent 100%
+        ),
+        /* Soft glass dome specular reflection */
+        radial-gradient(
+            circle at ${lightX}% ${lightY}%,
+            rgba(255, 255, 255, 0.35) 0%,
+            rgba(255, 255, 255, 0.10) 45%,
+            transparent 80%
+        ),
+        /* Base translucent glass tint */
+        rgba(255, 255, 255, 0.08);
 
     /* Crystalline Refractive Rim & Bevel */
-    border: 1px solid rgba(255, 255, 255, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.50);
     box-shadow:
         0 24px 60px rgba(0, 0, 0, 0.35),
-        inset 0 1.5px 2px rgba(255, 255, 255, 0.65),
-        inset 0 -1.5px 2px rgba(0, 0, 0, 0.20);
+        inset 0 2px 4px rgba(255, 255, 255, 0.85),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.25);
 }`;
     }
 

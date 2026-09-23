@@ -261,12 +261,14 @@
             </div>
         </div>
 
-        <!-- Code Snippet Modal Drawer (CSS Glass Style Only) -->
+        <!-- Code Snippet Modal Drawer -->
         <div class="modal-backdrop" id="code-modal">
             <div class="modal-card">
                 <div class="modal-header">
-                    <div class="modal-title-wrap">
-                        <span class="modal-code-title">CSS Glass Style</span>
+                    <div class="modal-tabs">
+                        <button class="modal-tab active" id="tab-css" data-lang="css">CSS Glass</button>
+                        <button class="modal-tab" id="tab-svg" data-lang="svg">Liquid SVG</button>
+                        <button class="modal-tab" id="tab-webgl" data-lang="webgl">WebGL (Exact)</button>
                     </div>
                     <div class="modal-header-right">
                         <span class="live-sync-pill"><span class="pulse-dot"></span> Realtime</span>
@@ -282,7 +284,7 @@
                             <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
                             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                         </svg>
-                        <span>Copy CSS</span>
+                        <span id="btn-copy-label">Copy Code</span>
                     </button>
                 </div>
             </div>
