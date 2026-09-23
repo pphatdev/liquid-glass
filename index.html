@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Liquid Glass - Interactive Demo</title>
+    <meta name="description" content="Physical optical refraction, diffusion, and liquid glass shaders for web interfaces.">
+    <link rel="stylesheet" href="./demo.css">
+</head>
+
+<body>
+    <div class="demo-wrapper">
+        <!-- Floating Card Viewport Size Switcher (Mobile / Tablet / Full) -->
+        <div class="card-size-bar" id="size-bar">
+            <button class="btn-size-chip active" data-size="mobile" title="Mobile Phone Card (390px)">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="5" y="2" width="14" height="20" rx="3"/>
+                    <line x1="12" y1="18" x2="12.01" y2="18"/>
+                </svg>
+                <span>Mobile</span>
+            </button>
+            <button class="btn-size-chip" data-size="tablet" title="Tablet Card (540px)">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="16" rx="2"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <span>Tablet</span>
+            </button>
+            <button class="btn-size-chip" data-size="full" title="Full Screen Viewport">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 3 21 3 21 9"/>
+                    <polyline points="9 21 3 21 3 15"/>
+                    <line x1="21" y1="3" x2="14" y2="10"/>
+                    <line x1="3" y1="21" x2="10" y2="14"/>
+                </svg>
+                <span>Full</span>
+            </button>
+        </div>
+
+        <!-- Main Device / Widget Container -->
+        <div class="glass-widget-card" id="widget-card">
+            <!-- Background & WebGL Canvas -->
+            <div class="canvas-viewport" id="canvas-viewport">
+                <canvas id="gl-canvas"></canvas>
+            </div>
+
+            <!-- Controls Overlay (Full width at bottom with centered ergonomic inner container) -->
+            <div class="controls-overlay">
+                <div class="controls-inner">
+                    <!-- Control 1: Brightness -->
+                    <div class="control-row-group">
+                        <div class="control-header">
+                            <span class="control-title">Brightness</span>
+                        </div>
+                        <div class="slider-row">
+                            <span class="icon-label icon-left" title="Low brightness">
+                                <!-- Sunrise / Low brightness icon -->
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M12 2v4M4.93 10.93l2.83-2.83M2 18h20M20 18a8 8 0 0 0-16 0M16.24 8.1l2.83 2.83M12 12v6" />
+                                </svg>
+                            </span>
+                            <div class="slider-track-wrap">
+                                <input id="sl-brightness" type="range" min="0.30" max="1.80" step="0.01" value="1.00"
+                                    class="custom-slider">
+                                <div class="slider-fill" id="fill-brightness"></div>
+                            </div>
+                            <span class="icon-label icon-right" title="High brightness">
+                                <!-- Bright sun icon -->
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="4" />
+                                    <path
+                                        d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Control 2: Diffusion -->
+                    <div class="control-row-group">
+                        <div class="control-header">
+                            <span class="control-title">Diffusion</span>
+                        </div>
+                        <div class="slider-row">
+                            <span class="icon-label icon-left icon-math" title="Zero frost blur">
+                                <!-- Minus icon -->
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                            </span>
+                            <div class="slider-track-wrap">
+                                <input id="sl-diffusion" type="range" min="0.00" max="1.00" step="0.01" value="0.28"
+                                    class="custom-slider">
+                                <div class="slider-fill" id="fill-diffusion"></div>
+                            </div>
+                            <span class="icon-label icon-right icon-math" title="High frost blur">
+                                <!-- Plus icon -->
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Control 3: Refraction -->
+                    <div class="control-row-group">
+                        <div class="control-header">
+                            <span class="control-title active-highlight">Refraction</span>
+                        </div>
+                        <div class="slider-row">
+                            <span class="icon-label icon-left" title="No refraction">
+                                <!-- Single dot icon -->
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                                    <circle cx="12" cy="12" r="2.5" />
+                                </svg>
+                            </span>
+                            <div class="slider-track-wrap">
+                                <input id="sl-refraction" type="range" min="0.00" max="0.25" step="0.002" value="0.10"
+                                    class="custom-slider">
+                                <div class="slider-fill" id="fill-refraction"></div>
+                            </div>
+                            <span class="icon-label icon-right" title="Strong refractive grid bending">
+                                <!-- Grid / 9-dots icon -->
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                                    <circle cx="5" cy="5" r="1.8" />
+                                    <circle cx="12" cy="5" r="1.8" />
+                                    <circle cx="19" cy="5" r="1.8" />
+                                    <circle cx="5" cy="12" r="1.8" />
+                                    <circle cx="12" cy="12" r="1.8" />
+                                    <circle cx="19" cy="12" r="1.8" />
+                                    <circle cx="5" cy="19" r="1.8" />
+                                    <circle cx="12" cy="19" r="1.8" />
+                                    <circle cx="19" cy="19" r="1.8" />
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Control 4: Angle -->
+                    <div class="control-row-group">
+                        <div class="control-header">
+                            <span class="control-title">Angle</span>
+                        </div>
+                        <div class="slider-row">
+                            <span class="icon-label icon-left" title="Light angle">
+                                <!-- Angle arc icon -->
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 21H3v-18" />
+                                    <path d="M15 21a12 12 0 0 0-12-12" />
+                                </svg>
+                            </span>
+                            <div class="slider-track-wrap">
+                                <input id="sl-angle" type="range" min="0" max="360" step="1" value="135"
+                                    class="custom-slider">
+                                <div class="slider-fill" id="fill-angle"></div>
+                            </div>
+                            <span class="icon-label icon-right" title="360 degree rotation">
+                                <!-- 360 circle / compass icon -->
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21.5 2v6h-6" />
+                                    <path d="M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.19" />
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Control 5: Border Radius -->
+                    <div class="control-row-group">
+                        <div class="control-header">
+                            <span class="control-title">Border Radius</span>
+                        </div>
+                        <div class="slider-row">
+                            <span class="icon-label icon-left" title="Sharp square panel">
+                                <!-- Sharp square icon -->
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 20V5a1 1 0 0 1 1-1h15" />
+                                </svg>
+                            </span>
+                            <div class="slider-track-wrap">
+                                <input id="sl-radius" type="range" min="0" max="100" step="1" value="100"
+                                    class="custom-slider">
+                                <div class="slider-fill" id="fill-radius"></div>
+                            </div>
+                            <span class="icon-label icon-right" title="Fully rounded circle">
+                                <!-- Rounded circle icon -->
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="9" />
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Action Row: Copy Button & Reset Button -->
+                    <div class="bottom-actions-row">
+                        <button id="btn-apply" class="btn-pill-apply" title="Copy realtime glass CSS to clipboard">
+                            <span class="copy-icon">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                </svg>
+                            </span>
+                            <span class="apply-text">Copy</span>
+                        </button>
+
+                        <button id="btn-reset" class="btn-circle-reset" title="Reset parameters to initial defaults">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.19" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Options / Palette / Code Toggle floating at top -->
+            <div class="top-nav-bar">
+                <div class="lens-drag-hint">
+                    <span class="pulse-dot"></span>
+                    <span>Drag on circle for light angle</span>
+                </div>
+
+                <!-- Background Color Palette in Top Nav -->
+                <div class="top-palette-bar">
+                    <div class="top-palette-info">
+                        <span class="top-palette-title">Color</span>
+                        <span class="palette-name-badge" id="palette-name">Azure Silk</span>
+                    </div>
+                    <div class="palette-swatches" id="palette-swatches">
+                        <!-- Injected via JavaScript -->
+                    </div>
+                    <button id="btn-random-color" class="btn-palette-random" title="Generate Random Color Scheme">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5" />
+                        </svg>
+                        <span>Random</span>
+                    </button>
+                </div>
+
+                <div class="top-nav-actions">
+                    <button id="btn-code" class="btn-code-toggle" title="View Realtime CSS Glass Style">
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="16 18 22 12 16 6" />
+                            <polyline points="8 6 2 12 8 18" />
+                        </svg>
+                        <span>CSS</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Code Snippet Modal Drawer (CSS Glass Style Only) -->
+        <div class="modal-backdrop" id="code-modal">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title-wrap">
+                        <span class="modal-code-title">CSS Glass Style</span>
+                    </div>
+                    <div class="modal-header-right">
+                        <span class="live-sync-pill"><span class="pulse-dot"></span> Realtime</span>
+                        <button class="modal-close" id="btn-close-modal">&times;</button>
+                    </div>
+                </div>
+                <pre class="code-pre"><code id="code-box"></code></pre>
+                <div class="modal-footer">
+                    <span class="modal-hint">Syncs in real time with sliders</span>
+                    <button class="modal-btn-copy" id="btn-copy">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                        </svg>
+                        <span>Copy CSS</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div class="toast-popup" id="toast">
+            <span class="toast-check">✓</span>
+            <span id="toast-message">Settings applied successfully</span>
+        </div>
+    </div>
+
+    <script type="module" src="./demo.js"></script>
+</body>
+
+</html>
