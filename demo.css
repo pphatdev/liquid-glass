@@ -272,11 +272,6 @@ body {
     background: rgba(0, 0, 0, 0.42);
 }
 
-.top-palette-info {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
 
 .top-palette-title {
     font-size: 11px;
@@ -284,17 +279,6 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: rgba(255, 255, 255, 0.65);
-}
-
-.palette-name-badge {
-    font-size: 11px;
-    font-weight: 500;
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.15);
-    padding: 2px 7px;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    white-space: nowrap;
 }
 
 .palette-swatches {
@@ -591,7 +575,7 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 24px;
     width: 100%;
-    max-width: 520px;
+    max-width: 580px;
     overflow: hidden;
     box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
     transform: translateY(20px) scale(0.97);
@@ -625,10 +609,12 @@ body {
 
 .modal-tabs {
     display: flex;
-    gap: 6px;
+    gap: 4px;
     background: rgba(255, 255, 255, 0.08);
     padding: 3px;
     border-radius: 10px;
+    overflow-x: auto;
+    scrollbar-width: none;
 }
 
 .modal-tab {
@@ -791,9 +777,6 @@ body {
         display: none;
     }
 
-    .palette-name-badge {
-        display: none;
-    }
 
     .top-nav-actions {
         order: 2;

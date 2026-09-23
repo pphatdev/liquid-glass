@@ -497,31 +497,34 @@ export function initLiquidGlassApp() {
     // Code Modal
     const codeModal = document.getElementById('code-modal');
     const btnCloseModal = document.getElementById('btn-close-modal');
-    const tabCss = document.getElementById('tab-css');
+    const tabDemo = document.getElementById('tab-demo');
+    const tabJs = document.getElementById('tab-js');
     const tabSvg = document.getElementById('tab-svg');
-    const tabWebgl = document.getElementById('tab-webgl');
+    const tabCss = document.getElementById('tab-css');
     const copyLabel = document.getElementById('btn-copy-label');
     const codeBox = document.getElementById('code-box');
     const btnCopy = document.getElementById('btn-copy');
     const btnQuickCopy = document.getElementById('btn-quick-copy');
 
-    let activeLang = 'css';
+    let activeLang = 'demo';
     let engine = null;
 
     function setTab(lang) {
         activeLang = lang;
-        if (tabCss) tabCss.classList.toggle('active', lang === 'css');
+        if (tabDemo) tabDemo.classList.toggle('active', lang === 'demo');
+        if (tabJs) tabJs.classList.toggle('active', lang === 'js');
         if (tabSvg) tabSvg.classList.toggle('active', lang === 'svg');
-        if (tabWebgl) tabWebgl.classList.toggle('active', lang === 'webgl');
+        if (tabCss) tabCss.classList.toggle('active', lang === 'css');
         if (copyLabel) {
-            copyLabel.textContent = lang === 'css' ? 'Copy CSS' : (lang === 'svg' ? 'Copy HTML+SVG' : 'Copy WebGL');
+            copyLabel.textContent = lang === 'demo' ? 'Copy Demo Card' : (lang === 'js' ? 'Copy JS Import' : (lang === 'svg' ? 'Copy HTML+SVG' : 'Copy CSS'));
         }
         updateLiveCode();
     }
 
-    if (tabCss) tabCss.addEventListener('click', () => setTab('css'));
+    if (tabDemo) tabDemo.addEventListener('click', () => setTab('demo'));
+    if (tabJs) tabJs.addEventListener('click', () => setTab('js'));
     if (tabSvg) tabSvg.addEventListener('click', () => setTab('svg'));
-    if (tabWebgl) tabWebgl.addEventListener('click', () => setTab('webgl'));
+    if (tabCss) tabCss.addEventListener('click', () => setTab('css'));
 
     // Helper: update live code box in real-time when sliders move
     function updateLiveCode() {
@@ -766,11 +769,11 @@ export function initLiquidGlassApp() {
     * Copy Button Action (replaces Apply)
     */
     btnApply.addEventListener('click', () => {
-        const cssSnippet = generateCode();
-        navigator.clipboard.writeText(cssSnippet).then(() => {
-            showToast('✓ Realtime Glass CSS copied!');
+        const snippet = generateCode();
+        navigator.clipboard.writeText(snippet).then(() => {
+            showToast(`✓ Copied with Refraction (${state.refraction.toFixed(2)})`);
         }).catch(() => {
-            showToast('CSS copied to clipboard');
+            showToast('Copied to clipboard');
         });
     });
 
@@ -814,37 +817,122 @@ export function initLiquidGlassApp() {
         const radiusValue = state.borderRadius === 100 ? '50%' : `${Math.round(state.borderRadius * 0.48)}px`;
         const bgGradient = getActiveBackgroundGradient();
 
-        if (activeLang === 'webgl') {
-            return `<!-- 1:1 Exact Liquid Glass WebGL Component -->
-<canvas id="liquid-glass" style="width: 100vw; height: 100vh; display: block;"></canvas>
+        if (activeLang === 'demo') {
+            return `<!-- Liquid Glass Demo Widget (Exact Demo Card) -->
+<!-- Save as index.html and open in any browser -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Liquid Glass - Demo Card</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #080c16;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 24px;
+    }
+    .liquid-glass-card {
+      width: 390px;
+      height: 720px;
+      max-width: 100%;
+      border-radius: 40px;
+      overflow: hidden;
+      position: relative;
+      background: #000;
+      box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.75),
+        0 0 0 1px rgba(255, 255, 255, 0.18),
+        inset 0 1px 1px rgba(255, 255, 255, 0.35);
+    }
+    #liquid-glass-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }
+    #liquid-glass-canvas:active {
+      cursor: grabbing;
+    }
+  </style>
+</head>
+<body>
 
-<script type="module">
-  import { LiquidGlass } from './liquid-glass.js';
+  <div class="liquid-glass-card">
+    <canvas id="liquid-glass-canvas"></canvas>
+  </div>
 
-  const canvas = document.getElementById('liquid-glass');
-  const glass = new LiquidGlass(canvas, {
-    palette: '${state.currentPaletteId}',
-    brightness: ${state.brightness.toFixed(2)},
-    diffusion: ${state.diffusion.toFixed(2)},
-    refraction: ${state.refraction.toFixed(2)},
-    angle: ${Math.round(state.angle)},
-    borderRadius: ${Math.round(state.borderRadius)},
-    interactive: true
-  });
-  glass.start();
-</script>`;
+  <script type="module">
+    import { LiquidGlass } from './liquid-glass.js';
+
+    const canvas = document.getElementById('liquid-glass-canvas');
+    const glass = new LiquidGlass(canvas, {
+      palette: '${state.currentPaletteId}',
+      brightness: ${state.brightness.toFixed(2)},
+      diffusion: ${state.diffusion.toFixed(2)},
+      refraction: ${state.refraction.toFixed(2)},
+      angle: ${Math.round(state.angle)},
+      borderRadius: ${Math.round(state.borderRadius)},
+      orbX: ${state.orbX.toFixed(2)},
+      orbY: ${state.orbY.toFixed(2)},
+      interactive: true
+    });
+
+    glass.start();
+  </script>
+</body>
+</html>`;
+        }
+
+        if (activeLang === 'js' || activeLang === 'webgl') {
+            return `// Liquid Glass - JavaScript Controller
+// Refraction: ${state.refraction.toFixed(2)} | Light Angle: ${Math.round(state.angle)}° | Frost Diffusion: ${state.diffusion.toFixed(2)}
+
+import { LiquidGlass } from './liquid-glass.js';
+
+// 1. Target canvas element
+const canvas = document.getElementById('liquid-glass-canvas');
+
+// 2. Initialize Liquid Glass with realtime parameters
+const glass = new LiquidGlass(canvas, {
+  palette: '${state.currentPaletteId}',    // 'azure' | 'sunset' | 'emerald' | 'violet' | 'rose'
+  brightness: ${state.brightness.toFixed(2)},
+  diffusion: ${state.diffusion.toFixed(2)},
+  refraction: ${state.refraction.toFixed(2)},
+  angle: ${Math.round(state.angle)},
+  borderRadius: ${Math.round(state.borderRadius)},
+  orbX: ${state.orbX.toFixed(2)},
+  orbY: ${state.orbY.toFixed(2)},
+  interactive: true
+});
+
+// 3. Start render loop
+glass.start();
+
+// Optional: Dynamically update parameters at runtime
+// glass.setOptions({ refraction: 0.15, angle: 180 });
+// glass.setPalette('sunset');`;
         }
 
         if (activeLang === 'svg') {
-            return `<!-- HTML + SVG Optical Liquid Refraction Lens -->
+            const refractScale = Math.round(state.refraction * 280);
+            const baseFreq = (0.012 + state.refraction * 0.04).toFixed(3);
+            return `<!-- HTML + SVG Optical Liquid Refraction Lens (Refraction: ${state.refraction.toFixed(2)}) -->
 <div class="glass-container">
-  <div class="liquid-glass-lens"></div>
+  <div class="liquid-glass-lens" id="liquid-lens"></div>
 </div>
 
-<svg style="position: absolute; width: 0; height: 0;">
+<!-- SVG Optical Refraction Filter (scale: ${refractScale} directly bends background light) -->
+<svg style="position: absolute; width: 0; height: 0; pointer-events: none;">
   <filter id="liquid-refract">
-    <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="2" result="noise" />
-    <feDisplacementMap in="SourceGraphic" in2="noise" scale="${Math.round(state.refraction * 250)}" xChannelSelector="R" yChannelSelector="G" />
+    <feTurbulence type="fractalNoise" baseFrequency="${baseFreq}" numOctaves="2" result="noise" />
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="${refractScale}" xChannelSelector="R" yChannelSelector="G" />
   </filter>
 </svg>
 
@@ -862,7 +950,7 @@ export function initLiquidGlassApp() {
     height: 280px;
     border-radius: ${radiusValue};
 
-    /* Optical SVG Liquid Bending + Blur */
+    /* Optical SVG Liquid Refraction + Frost Blur */
     backdrop-filter: url(#liquid-refract) blur(${blurPx}px) brightness(${state.brightness.toFixed(2)});
     -webkit-backdrop-filter: url(#liquid-refract) blur(${blurPx}px) brightness(${state.brightness.toFixed(2)});
 
@@ -889,12 +977,32 @@ export function initLiquidGlassApp() {
         0 24px 60px rgba(0, 0, 0, 0.35),
         inset 0 2px 4px rgba(255, 255, 255, 0.85),
         inset 0 -2px 4px rgba(0, 0, 0, 0.25);
+    cursor: grab;
 }
-</style>`;
+</style>
+
+<script>
+// Interactive JavaScript: makes the specular highlight dynamically follow cursor
+const lens = document.getElementById('liquid-lens');
+window.addEventListener('mousemove', (e) => {
+    const rect = lens.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const rad = Math.atan2(cy - e.clientY, e.clientX - cx);
+    const lx = Math.round(50 + 26 * Math.cos(rad));
+    const ly = Math.round(50 - 26 * Math.sin(rad));
+    lens.style.background = \`radial-gradient(circle 44px at \${lx}% \${ly}%, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.65) 28%, transparent 100%), radial-gradient(circle at \${lx}% \${ly}%, rgba(255, 255, 255, 0.35) 0%, transparent 80%), rgba(255, 255, 255, 0.08)\`;
+});
+</script>`;
         }
 
         // CSS Only mode
+        const refractSpread = Math.round(state.refraction * 55 + 4);
+        const refractGlow = (0.35 + state.refraction * 1.5).toFixed(2);
+        const chromaticOffset = Math.round(state.refraction * 12 + 1);
+
         return `/* Realtime Liquid Glass Style (${state.paletteName}) */
+/* Optical Refraction: ${state.refraction.toFixed(2)} | Incident Light: ${Math.round(state.angle)}° */
 
 /* 1. Background Container */
 .glass-container {
@@ -915,7 +1023,7 @@ export function initLiquidGlassApp() {
     backdrop-filter: blur(${blurPx}px) brightness(${state.brightness.toFixed(2)});
     -webkit-backdrop-filter: blur(${blurPx}px) brightness(${state.brightness.toFixed(2)});
 
-    /* Specular Shining Glare Spot (Intense glossy highlight at ${Math.round(state.angle)}°) */
+    /* Specular Shining Glare Spot at ${Math.round(state.angle)}° */
     background:
         /* Crisp high-gloss shining spot at light coordinates */
         radial-gradient(
@@ -935,10 +1043,15 @@ export function initLiquidGlassApp() {
         /* Base translucent glass tint */
         rgba(255, 255, 255, 0.08);
 
-    /* Crystalline Refractive Rim & Bevel */
+    /* Refractive Rim, Bevel & Chromatic Dispersion (Refraction: ${state.refraction.toFixed(2)}) */
     border: 1px solid rgba(255, 255, 255, 0.50);
     box-shadow:
         0 24px 60px rgba(0, 0, 0, 0.35),
+        /* Total Internal Refraction Ring */
+        inset 0 0 ${refractSpread}px rgba(255, 255, 255, ${refractGlow}),
+        /* Chromatic Dispersion Red/Blue Wavelength Edge */
+        inset ${chromaticOffset}px 0 ${chromaticOffset * 2}px rgba(255, 60, 120, 0.25),
+        inset -${chromaticOffset}px 0 ${chromaticOffset * 2}px rgba(60, 160, 255, 0.25),
         inset 0 2px 4px rgba(255, 255, 255, 0.85),
         inset 0 -2px 4px rgba(0, 0, 0, 0.25);
 }`;
@@ -964,11 +1077,11 @@ export function initLiquidGlassApp() {
     // Quick copy button in top nav
     if (btnQuickCopy) {
         btnQuickCopy.addEventListener('click', () => {
-            const cssSnippet = generateCode();
-            navigator.clipboard.writeText(cssSnippet).then(() => {
-                showToast('✓ Realtime glass CSS copied!');
+            const snippet = generateCode();
+            navigator.clipboard.writeText(snippet).then(() => {
+                showToast(`✓ Copied with Refraction (${state.refraction.toFixed(2)})`);
             }).catch(() => {
-                showToast('CSS copied to clipboard');
+                showToast('Copied to clipboard');
             });
         });
     }
@@ -977,10 +1090,10 @@ export function initLiquidGlassApp() {
     if (btnCopy) {
         btnCopy.addEventListener('click', () => {
             navigator.clipboard.writeText(codeBox.textContent).then(() => {
-                showToast('✓ Copied CSS glass style!');
+                showToast(`✓ Copied with Refraction (${state.refraction.toFixed(2)})`);
                 closeModal();
             }).catch(() => {
-                showToast('CSS copied to clipboard');
+                showToast('Copied to clipboard');
                 closeModal();
             });
         });

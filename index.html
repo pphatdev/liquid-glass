@@ -232,10 +232,6 @@
 
                 <!-- Background Color Palette in Top Nav -->
                 <div class="top-palette-bar">
-                    <div class="top-palette-info">
-                        <span class="top-palette-title">Color</span>
-                        <span class="palette-name-badge" id="palette-name">Azure Silk</span>
-                    </div>
                     <div class="palette-swatches" id="palette-swatches">
                         <!-- Injected via JavaScript -->
                     </div>
@@ -249,13 +245,13 @@
                 </div>
 
                 <div class="top-nav-actions">
-                    <button id="btn-code" class="btn-code-toggle" title="View Realtime CSS Glass Style">
+                    <button id="btn-code" class="btn-code-toggle" title="View Realtime JavaScript & CSS Code">
                         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
                             stroke-width="2">
                             <polyline points="16 18 22 12 16 6" />
                             <polyline points="8 6 2 12 8 18" />
                         </svg>
-                        <span>CSS</span>
+                        <span>JS / CSS</span>
                     </button>
                 </div>
             </div>
@@ -266,9 +262,10 @@
             <div class="modal-card">
                 <div class="modal-header">
                     <div class="modal-tabs">
-                        <button class="modal-tab active" id="tab-css" data-lang="css">CSS Glass</button>
-                        <button class="modal-tab" id="tab-svg" data-lang="svg">Liquid SVG</button>
-                        <button class="modal-tab" id="tab-webgl" data-lang="webgl">WebGL (Exact)</button>
+                        <button class="modal-tab active" id="tab-demo" data-lang="demo">Demo Card (HTML+JS)</button>
+                        <button class="modal-tab" id="tab-js" data-lang="js">JS Import</button>
+                        <button class="modal-tab" id="tab-svg" data-lang="svg">HTML + SVG</button>
+                        <button class="modal-tab" id="tab-css" data-lang="css">CSS Only</button>
                     </div>
                     <div class="modal-header-right">
                         <span class="live-sync-pill"><span class="pulse-dot"></span> Realtime</span>
