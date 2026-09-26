@@ -4,63 +4,9 @@
  * silk wave background shader, interactive dragging, and live slider reactivity.
  */
 
-export const PALETTES = [
-    {
-        id: 'azure',
-        name: 'Azure Silk',
-        deep: [0.04, 0.22, 0.72],
-        mid: [0.08, 0.48, 0.96],
-        sky: [0.38, 0.72, 0.98],
-        bright: [0.18, 0.64, 0.98],
-        glow: [0.98, 0.82, 0.60],
-        warmth: [0.95, 0.68, 0.48],
-        preview: 'linear-gradient(135deg, #0438b8, #1898f8, #f8c880)',
-    },
-    {
-        id: 'sunset',
-        name: 'Sunset Gold',
-        deep: [0.38, 0.06, 0.24],
-        mid: [0.82, 0.20, 0.28],
-        sky: [0.98, 0.64, 0.32],
-        bright: [1.0, 0.42, 0.20],
-        glow: [1.0, 0.92, 0.65],
-        warmth: [0.98, 0.52, 0.30],
-        preview: 'linear-gradient(135deg, #60103c, #d13448, #f8a452)',
-    },
-    {
-        id: 'emerald',
-        name: 'Emerald Aurora',
-        deep: [0.02, 0.26, 0.24],
-        mid: [0.06, 0.56, 0.44],
-        sky: [0.22, 0.82, 0.68],
-        bright: [0.32, 0.98, 0.74],
-        glow: [0.86, 0.98, 0.62],
-        warmth: [0.38, 0.86, 0.58],
-        preview: 'linear-gradient(135deg, #05423d, #0fa07c, #b4f88e)',
-    },
-    {
-        id: 'violet',
-        name: 'Cyber Violet',
-        deep: [0.16, 0.04, 0.40],
-        mid: [0.48, 0.12, 0.75],
-        sky: [0.80, 0.42, 0.95],
-        bright: [0.22, 0.84, 0.98],
-        glow: [0.95, 0.65, 1.0],
-        warmth: [0.65, 0.22, 0.85],
-        preview: 'linear-gradient(135deg, #290a66, #7a1fbf, #38d6fa)',
-    },
-    {
-        id: 'rose',
-        name: 'Obsidian Rose',
-        deep: [0.22, 0.04, 0.12],
-        mid: [0.64, 0.12, 0.30],
-        sky: [0.92, 0.46, 0.60],
-        bright: [0.98, 0.58, 0.74],
-        glow: [1.0, 0.82, 0.80],
-        warmth: [0.85, 0.32, 0.48],
-        preview: 'linear-gradient(135deg, #380a1e, #a31e4d, #f9a4bf)',
-    }
-];
+import { PALETTES } from './liquid-glass.js';
+
+export { PALETTES };
 
 // Helper: HSL to RGB [0..1]
 export function hslToRgb(h, s, l) {

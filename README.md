@@ -28,6 +28,23 @@ Available as a **zero-dependency WebGL library**, a drop-in **HTML Web Component
 * 📱 **Ergonomic Widget Card** — Responsive card container with mobile, tablet, and fullscreen views.
 * ⚡ **Zero Dependencies** — Single lightweight ESM bundle under 18 KB with 60 FPS GPU acceleration.
 * 🧩 **Web Component Ready** — Drop into any website with `<liquid-glass palette="azure"></liquid-glass>`.
+* 🔋 **Idle Pausing & Reduced Motion** — Auto-pauses rendering when the tab is hidden or the canvas scrolls offscreen; respects `prefers-reduced-motion`.
+
+---
+
+## 📦 Install
+
+```bash
+npm install @pphatdev/liquid-glass
+```
+
+Or use directly from a CDN:
+
+```html
+<script type="module">
+  import { LiquidGlass } from 'https://cdn.jsdelivr.net/gh/pphatdev/liquid-glass/liquid-glass.js';
+</script>
+```
 
 ---
 
@@ -163,6 +180,7 @@ glass.start();
 | `orbX` | `number` | `0.50` | Center horizontal position in UV space (`0.0` – `1.0`) |
 | `orbY` | `number` | `0.68` | Center vertical position in UV space (`0.0` – `1.0`) |
 | `interactive` | `boolean` | `true` | Enables pointer dragging to move the lens & rotate light angle |
+| `reducedMotion` | `boolean` | `prefers-reduced-motion` | Freeze the animated background and render only on demand (defaults to the user's OS setting) |
 
 ### Methods
 
@@ -171,7 +189,9 @@ glass.start();
 * **`glass.setOptions(options)`**: Dynamically updates configuration parameters at runtime without reloading.
 * **`glass.setPalette(paletteId)`**: Smoothly transitions colors to a new theme.
 * **`glass.resize()`**: Recalculates canvas dimensions and viewport taking `devicePixelRatio` into account.
-* **`glass.destroy()`**: Cancels animation frame and disconnects resize observers.
+* **`glass.destroy()`**: Stops the render loop, removes all event listeners, disconnects the resize observer, and frees WebGL resources.
+
+The web component reacts live to attribute changes: `palette`, `brightness`, `diffusion`, `refraction`, `angle`, `border-radius`, `ior`, `dispersion`, `radius`, `interactive`, `reduced-motion`, and `aria-label` (exposed as an accessible image description).
 
 ---
 
@@ -265,6 +285,9 @@ For high-performance pure CSS glass cards:
 
 ```
 ├── liquid-glass.js        # Standalone reusable WebGL library & Web Component
+├── liquid-glass.d.ts      # TypeScript type definitions
+├── package.json           # npm package metadata (@pphatdev/liquid-glass)
+├── LICENSE                # MIT license
 ├── demo.js                # Interactive reference controller & code exporter
 ├── demo.css               # Modern iOS-inspired styling & glassmorphism theme
 ├── index.html             # Interactive showcase application

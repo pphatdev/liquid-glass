@@ -213,12 +213,14 @@ export class LiquidGlass {
         this.canvas = typeof target === 'string' ? document.querySelector(target) : target;
         if (!this.canvas) throw new Error('LiquidGlass: target canvas not found');
 
-        this.gl = this.canvas.getContext('webgl', {
+        const contextAttributes = {
             alpha: false,
             antialias: true,
             depth: false,
             powerPreference: 'high-performance'
-        });
+        };
+        this.gl = this.canvas.getContext('webgl', contextAttributes)
+            || this.canvas.getContext('experimental-webgl', contextAttributes);
         if (!this.gl) throw new Error('WebGL not supported');
 
         const paletteObj = PALETTES.find(p => p.id === options.palette) || PALETTES[0];
@@ -235,6 +237,9 @@ export class LiquidGlass {
             orbX: options.orbX ?? 0.50,
             orbY: options.orbY ?? 0.68,
             interactive: options.interactive ?? true,
+            reducedMotion: options.reducedMotion ??
+                (typeof window !== 'undefined' && typeof window.matchMedia === 'function' &&
+                    window.matchMedia('(prefers-reduced-motion: reduce)').matches),
         };
 
         this.currentColors = {
@@ -258,16 +263,70 @@ export class LiquidGlass {
         this.uniforms = {};
         this.startTime = performance.now();
         this.animId = null;
+        this._listeners = [];
+        this._userStarted = false;
+        this._hidden = typeof document !== 'undefined' && document.hidden;
+        this._offscreen = false;
+        this._renderFrame = () => {
+            this.render();
+            this.animId = this._shouldAnimate() ? requestAnimationFrame(this._renderFrame) : null;
+        };
 
         this.initGL();
         this.resize();
 
+        this._interactionBound = false;
         if (this.options.interactive) {
             this.initInteraction();
+            this._interactionBound = true;
+        }
+
+        this._onContextLost = (e) => {
+            e.preventDefault();
+            this._halt();
+        };
+        this._onContextRestored = () => {
+            this.disposeGL();
+            this.initGL();
+            this.resize();
+        };
+        this._addListener(this.canvas, 'webglcontextlost', this._onContextLost);
+        this._addListener(this.canvas, 'webglcontextrestored', this._onContextRestored);
+
+        this._onVisibilityChange = () => {
+            this._hidden = document.hidden;
+            if (this._hidden) this._halt();
+            else this._tick();
+        };
+        this._addListener(document, 'visibilitychange', this._onVisibilityChange);
+
+        if (typeof IntersectionObserver !== 'undefined') {
+            this._intersectionObserver = new IntersectionObserver((entries) => {
+                this._offscreen = !entries[entries.length - 1].isIntersecting;
+                if (this._offscreen) this._halt();
+                else this._tick();
+            });
+            this._intersectionObserver.observe(this.canvas);
         }
 
         this._resizeObserver = new ResizeObserver(() => this.resize());
         this._resizeObserver.observe(this.canvas);
+    }
+
+    _addListener(target, type, handler, options, tag) {
+        target.addEventListener(type, handler, options);
+        this._listeners.push({ target, type, handler, options, tag });
+    }
+
+    _removeListeners(tag) {
+        if (!this._listeners) return;
+        this._listeners = this._listeners.filter(l => {
+            if (l.tag === tag) {
+                l.target.removeEventListener(l.type, l.handler, l.options);
+                return false;
+            }
+            return true;
+        });
     }
 
     initGL() {
@@ -283,6 +342,8 @@ export class LiquidGlass {
         if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
             throw new Error(gl.getProgramInfoLog(prog));
         }
+        gl.deleteShader(vs);
+        gl.deleteShader(fs);
         this.program = prog;
 
         this.quadBuffer = gl.createBuffer();
@@ -319,6 +380,7 @@ export class LiquidGlass {
             this.canvas.width = tw;
             this.canvas.height = th;
             this.gl.viewport(0, 0, tw, th);
+            this._tick();
         }
     }
 
@@ -330,18 +392,36 @@ export class LiquidGlass {
         ['deep', 'mid', 'sky', 'bright', 'glow', 'warmth'].forEach(k => {
             this.targetColors[k] = [...p[k]];
         });
+        this._tick();
     }
 
     setOptions(opts = {}) {
         Object.assign(this.options, opts);
         if (opts.palette) this.setPalette(opts.palette);
+        if ('interactive' in opts && !!opts.interactive !== this._interactionBound) {
+            if (opts.interactive) this.initInteraction();
+            else this._removeListeners('interaction');
+            this._interactionBound = !!opts.interactive;
+        }
+        this._tick();
+    }
+
+    disposeGL() {
+        const gl = this.gl;
+        if (!gl) return;
+        if (this.program) gl.deleteProgram(this.program);
+        if (this.quadBuffer) gl.deleteBuffer(this.quadBuffer);
+        this.program = null;
+        this.quadBuffer = null;
+        this.posAttrib = null;
+        this.uniforms = {};
     }
 
     render() {
         const gl = this.gl;
-        if (!gl) return;
+        if (!gl || !this.program) return;
 
-        const lerpSpeed = 0.08;
+        const lerpSpeed = this.options.reducedMotion ? 1.0 : 0.08;
         ['deep', 'mid', 'sky', 'bright', 'glow', 'warmth'].forEach(k => {
             const cur = this.currentColors[k];
             const tar = this.targetColors[k];
@@ -355,7 +435,7 @@ export class LiquidGlass {
         gl.enableVertexAttribArray(this.posAttrib);
         gl.vertexAttribPointer(this.posAttrib, 2, gl.FLOAT, false, 0, 0);
 
-        const elapsed = (performance.now() - this.startTime) * 0.001;
+        const elapsed = this.options.reducedMotion ? 0 : (performance.now() - this.startTime) * 0.001;
         const o = this.options;
 
         gl.uniform2f(this.uniforms['u_resolution'], this.canvas.width, this.canvas.height);
@@ -380,78 +460,157 @@ export class LiquidGlass {
         gl.drawArrays(gl.TRIANGLES, 0, 3);
     }
 
-    start() {
-        if (this.animId) return;
-        const loop = () => {
-            this.render();
-            this.animId = requestAnimationFrame(loop);
-        };
-        this.animId = requestAnimationFrame(loop);
+    _shouldAnimate() {
+        return this._userStarted && !this._hidden && !this._offscreen && !this.options.reducedMotion;
     }
 
-    stop() {
+    _tick() {
+        if (this.animId || !this._userStarted || this._hidden || this._offscreen) return;
+        this.animId = requestAnimationFrame(this._renderFrame);
+    }
+
+    _halt() {
         if (this.animId) {
             cancelAnimationFrame(this.animId);
             this.animId = null;
         }
     }
 
+    start() {
+        this._userStarted = true;
+        this._tick();
+    }
+
+    stop() {
+        this._userStarted = false;
+        this._halt();
+    }
+
     destroy() {
         this.stop();
-        if (this._resizeObserver) this._resizeObserver.disconnect();
+        if (this._resizeObserver) {
+            this._resizeObserver.disconnect();
+            this._resizeObserver = null;
+        }
+        if (this._intersectionObserver) {
+            this._intersectionObserver.disconnect();
+            this._intersectionObserver = null;
+        }
+        if (this._listeners) {
+            for (const { target, type, handler, options } of this._listeners) {
+                target.removeEventListener(type, handler, options);
+            }
+            this._listeners = null;
+        }
+        this.disposeGL();
+        if (this.gl) {
+            const loseContext = this.gl.getExtension('WEBGL_lose_context');
+            if (loseContext) loseContext.loseContext();
+            this.gl = null;
+        }
     }
 
     initInteraction() {
-        let isDragging = false;
+        this.canvas.style.touchAction = 'none';
         const getUv = (e) => {
             const rect = this.canvas.getBoundingClientRect();
-            const cx = e.clientX ?? (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
-            const cy = e.clientY ?? (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
             return {
-                x: (cx - rect.left) / rect.width,
-                y: 1.0 - (cy - rect.top) / rect.height
+                x: Math.max(0.12, Math.min(0.88, (e.clientX - rect.left) / rect.width)),
+                y: Math.max(0.12, Math.min(0.88, 1.0 - (e.clientY - rect.top) / rect.height))
             };
         };
 
+        let isDragging = false;
         const onDown = (e) => {
             isDragging = true;
+            if (this.canvas.setPointerCapture) {
+                try { this.canvas.setPointerCapture(e.pointerId); } catch (err) { /* capture is best-effort */ }
+            }
             const uv = getUv(e);
-            this.options.orbX = Math.max(0.12, Math.min(0.88, uv.x));
-            this.options.orbY = Math.max(0.12, Math.min(0.88, uv.y));
+            this.options.orbX = uv.x;
+            this.options.orbY = uv.y;
+            this._tick();
         };
         const onMove = (e) => {
             if (!isDragging) return;
             const uv = getUv(e);
-            this.options.orbX = Math.max(0.12, Math.min(0.88, uv.x));
-            this.options.orbY = Math.max(0.12, Math.min(0.88, uv.y));
+            this.options.orbX = uv.x;
+            this.options.orbY = uv.y;
+            this._tick();
         };
-        const onUp = () => { isDragging = false; };
+        const onUp = (e) => {
+            isDragging = false;
+            if (this.canvas.hasPointerCapture && this.canvas.hasPointerCapture(e.pointerId)) {
+                this.canvas.releasePointerCapture(e.pointerId);
+            }
+        };
 
-        this.canvas.addEventListener('mousedown', onDown);
-        window.addEventListener('mousemove', onMove);
-        window.addEventListener('mouseup', onUp);
-        this.canvas.addEventListener('touchstart', onDown, { passive: true });
-        window.addEventListener('touchmove', onMove, { passive: true });
-        window.addEventListener('touchend', onUp);
+        this._addListener(this.canvas, 'pointerdown', onDown, undefined, 'interaction');
+        this._addListener(this.canvas, 'pointermove', onMove, undefined, 'interaction');
+        this._addListener(this.canvas, 'pointerup', onUp, undefined, 'interaction');
+        this._addListener(this.canvas, 'pointercancel', onUp, undefined, 'interaction');
     }
 }
 
 // Optional Custom HTML Web Component: <liquid-glass palette="azure"></liquid-glass>
 if (typeof customElements !== 'undefined' && !customElements.get('liquid-glass')) {
     customElements.define('liquid-glass', class extends HTMLElement {
+        static get observedAttributes() {
+            return ['palette', 'brightness', 'diffusion', 'refraction', 'angle',
+                'border-radius', 'ior', 'dispersion', 'radius', 'interactive',
+                'reduced-motion', 'aria-label'];
+        }
+
         connectedCallback() {
+            if (this._instance) return;
             const canvas = document.createElement('canvas');
             canvas.style.width = '100%';
             canvas.style.height = '100%';
             canvas.style.display = 'block';
+            canvas.setAttribute('role', 'img');
+            canvas.setAttribute('aria-label', this.getAttribute('aria-label') || 'Liquid glass lens');
             this.appendChild(canvas);
-            const palette = this.getAttribute('palette') || 'azure';
-            const refraction = parseFloat(this.getAttribute('refraction') || '0.10');
-            this._instance = new LiquidGlass(canvas, { palette, refraction });
+            this._canvas = canvas;
+            this._instance = new LiquidGlass(canvas, this._readOptions());
             this._instance.start();
         }
+
+        attributeChangedCallback(name, oldValue, newValue) {
+            if (oldValue === newValue) return;
+            if (name === 'aria-label') {
+                if (this._canvas) this._canvas.setAttribute('aria-label', newValue || 'Liquid glass lens');
+                return;
+            }
+            if (this._instance) this._instance.setOptions(this._readOptions());
+        }
+
         disconnectedCallback() {
-            if (this._instance) this._instance.destroy();
+            if (this._instance) {
+                this._instance.destroy();
+                this._instance = null;
+            }
+        }
+
+        _readOptions() {
+            const num = (attr, fallback) => {
+                const v = parseFloat(this.getAttribute(attr));
+                return Number.isFinite(v) ? v : fallback;
+            };
+            const opts = {
+                palette: this.getAttribute('palette') || 'azure',
+                brightness: num('brightness', 1.0),
+                diffusion: num('diffusion', 0.28),
+                refraction: num('refraction', 0.10),
+                angle: num('angle', 135.0),
+                borderRadius: num('border-radius', 50),
+                ior: num('ior', 1.48),
+                dispersion: num('dispersion', 0.022),
+                radius: num('radius', 0.26),
+                interactive: this.getAttribute('interactive') !== 'false'
+            };
+            const reducedMotion = this.getAttribute('reduced-motion');
+            if (reducedMotion !== null) opts.reducedMotion = reducedMotion !== 'false';
+            return opts;
         }
     });
 }

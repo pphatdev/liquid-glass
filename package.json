@@ -1,0 +1,54 @@
+{
+    "name": "@pphatdev/liquid-glass",
+    "version": "1.1.0",
+    "description": "Ultra-realistic 3D optical liquid glass lenses: Snell's Law refraction, chromatic dispersion, dynamic specular glare, and silk wave shaders. Zero-dependency WebGL library and Web Component.",
+    "type": "module",
+    "main": "./liquid-glass.js",
+    "module": "./liquid-glass.js",
+    "types": "./liquid-glass.d.ts",
+    "exports": {
+        ".": {
+            "types": "./liquid-glass.d.ts",
+            "import": "./liquid-glass.js",
+            "default": "./liquid-glass.js"
+        }
+    },
+    "files": [
+        "liquid-glass.js",
+        "liquid-glass.d.ts",
+        "README.md",
+        "LICENSE"
+    ],
+    "keywords": [
+        "liquid-glass",
+        "glassmorphism",
+        "webgl",
+        "glsl",
+        "shader",
+        "refraction",
+        "snells-law",
+        "chromatic-dispersion",
+        "web-component",
+        "custom-element",
+        "glass",
+        "lens",
+        "zero-dependency"
+    ],
+    "author": "Sophat Pho (pphatdev)",
+    "license": "MIT",
+    "homepage": "https://pphatdev.github.io/liquid-glass/",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/pphatdev/liquid-glass.git"
+    },
+    "bugs": {
+        "url": "https://github.com/pphatdev/liquid-glass/issues"
+    },
+    "engines": {
+        "node": ">=14"
+    },
+    "browserslist": [
+        "defaults",
+        "not dead"
+    ]
+}
